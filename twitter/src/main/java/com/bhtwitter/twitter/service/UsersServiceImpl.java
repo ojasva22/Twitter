@@ -1,13 +1,15 @@
 package com.bhtwitter.twitter.service;
 
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import com.bhtwitter.twitter.dao.UsersDAO;
 import com.bhtwitter.twitter.entity.Users;
-@Repository
+@Service
 public class UsersServiceImpl implements UsersService {
 	
 	private UsersDAO usersDAO;
@@ -25,6 +27,14 @@ public class UsersServiceImpl implements UsersService {
 	public Users getUserById(Integer id) {
 		// TODO Auto-generated method stub
 		return usersDAO.getUserById(id);
+	}
+	@Override
+	public Users getUserByUsername(String username) {
+		return usersDAO.getUserByUsername(username);
+	}
+	@Override
+	public List<Users> getUsers() {
+		return usersDAO.getUsers();
 	}
 
 }

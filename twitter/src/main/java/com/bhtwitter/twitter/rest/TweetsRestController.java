@@ -1,8 +1,10 @@
 package com.bhtwitter.twitter.rest;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,12 +19,12 @@ import com.bhtwitter.twitter.service.UsersService;
 @RestController
 @RequestMapping("/api")
 public class TweetsRestController {
-	private UsersService usersService;
+	//private UsersService usersService;
 	private TweetService tweetService;
 	@Autowired
-	public TweetsRestController(TweetService theTweetService, UsersService theUsersService) {
+	public TweetsRestController(TweetService theTweetService) {
 		tweetService = theTweetService;
-		usersService = theUsersService;
+		//usersService = theUsersService;
 	}
 	
 	@PostMapping("/{userId}/tweets")
@@ -31,7 +33,7 @@ public class TweetsRestController {
 	{
 		//theTweet.setTweetUserId(Users);
 		
-		
+		theTweet.setCreatedOn(LocalDateTime.now());
 		tweetService.save(theTweet, userId);
 	}
 	@GetMapping("/tweets/{tag}")
@@ -40,5 +42,9 @@ public class TweetsRestController {
 		for(Tweets t : tt) {
 			System.out.println(t);
 		}
+	}
+	@DeleteMapping("/tweets/{tweetId}")
+	public void deleteTweet(@PathVariable int tweetId) {
+		tweetService.delete(tweetId);
 	}
 }

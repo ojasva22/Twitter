@@ -45,7 +45,7 @@ public class TweetServiceImpl implements TweetService {
 			{
 				i=i+1;
 				String tag="";
-				while(t.charAt(i)!='#' && t.charAt(i)!=' '&& i<l) {
+				while((i<l) && (t.charAt(i)!='#' || t.charAt(i)!=' ')) {
 					tag=tag+t.charAt(i);
 					i++;
 				}
@@ -65,8 +65,27 @@ public class TweetServiceImpl implements TweetService {
 
 
 	@Override
+	
 	public List<Tweets> getTagRelatedTweets(String tag) {
 		return tweetsDAO.getTagRelatedTweets(tag);
+	}
+
+
+
+	@Override
+	@Transactional
+	public void delete(int tweetId) {
+		//Check if tweet was posted by user else error
+		tweetsDAO.delete(tweetId);
+		
+	}
+
+
+
+	@Override
+	@Transactional
+	public Tweets getTweetById(int id) {
+		return tweetsDAO.getTweetById(id);
 	}
 
 

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,8 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name="users")
 public class Users{
@@ -35,30 +35,47 @@ public class Users{
 	
 	@Column(name="created_on")
 	private LocalDateTime createdOn;
-	/*
-	@Column(name="user_type_id")
-	private Integer userTypeId;
-	*/
+	
 	
 	@OneToOne(cascade = CascadeType.ALL,  orphanRemoval = true)
+	@JsonIgnore
 	@JoinColumn(name="user_type_id", referencedColumnName = "id")
 	private UserType userType;
 	
 	Users(){}
 	
 	
-	@OneToMany(mappedBy = "tweetUserId", cascade = CascadeType.ALL)
-	private List<Tweets> twts;
+	@OneToMany(mappedBy = "tweetUserId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<Tweets> tweets;
+	@OneToMany(mappedBy = "userToFollow", fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<Followers> followers;
+	@OneToMany(mappedBy = "userFollower", fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<Followers> following;
 	
 	
-	public List<Tweets> getTwts() {
-		return twts;
+	public List<Followers> getFollowers() {
+		return followers;
 	}
 
 
 
-	public void setTwts(List<Tweets> twts) {
-		this.twts = twts;
+	public void setFollowers(List<Followers> followers) {
+		this.followers = followers;
+	}
+
+
+
+	public List<Tweets> getTweets() {
+		return tweets;
+	}
+
+
+
+	public void setTweets(List<Tweets> tweets) {
+		this.tweets = tweets;
 	}
 
 
@@ -75,7 +92,7 @@ public class Users{
 
 
 
-	private Users(String username, String password, String email, LocalDateTime createdOn) {
+	public Users(String username, String password, String email, LocalDateTime createdOn) {
 		
 		this.username = username;
 		this.password = password;

@@ -25,11 +25,26 @@ public class TweetsDAOImpl implements TweetsDAO {
 	@Override
 	public List<Tweets> getTagRelatedTweets(String tag) {
 		Session currentSession = entityManager.unwrap(Session.class);
-		String sql = "from tweets where :tag in indices(tags)";
-		Query query = currentSession.createQuery(sql);
-		query.setParameter("tag", tag);
+		String sql = "from Tweets t join t.tags tt where tt= :tSearch";
+		Query query = currentSession.createQuery(sql).setString("tSearch", tag);
+		//query.setParameter("tSearch", tag);
 		List<Tweets> resTweet = (List<Tweets>)query.getResultList();
 		return resTweet;
+	}
+	@Override
+	public void delete(int tweetId) {
+		Session currentSession  = entityManager.unwrap(Session.class);
+		Query q = currentSession.createQuery("delete from Tweets where tweetId = :tweetId");
+		q.setParameter("tweetId", tweetId);
+		q.executeUpdate();
+	}
+	@Override
+	public Tweets getTweetById(int id) {
+		Session currentSession = entityManager.unwrap(Session.class);
+		Query q = currentSession.createQuery("from Tweets where tweetId = :id");
+		q.setParameter("id",id);
+		Tweets t = (Tweets) q.getSingleResult();
+		return t;
 	}
 	
 }
