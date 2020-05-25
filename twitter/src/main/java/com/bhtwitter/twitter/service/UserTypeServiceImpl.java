@@ -1,20 +1,18 @@
 package com.bhtwitter.twitter.service;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.bhtwitter.twitter.dao.UserTypeDAO;
 import com.bhtwitter.twitter.entity.UserType;
-@Repository
+@Service
 public class UserTypeServiceImpl implements UserTypeService {
+	@Autowired
 	private UserTypeDAO userTypeDAO;
-	UserTypeServiceImpl(UserTypeDAO theUserTypeDAO){
-		userTypeDAO=theUserTypeDAO;
-	}
+	
 	@Override
-	public void save(UserType userType) {
-		// TODO Auto-generated method stub
-		userTypeDAO.save(userType);
-
-	}
+	public UserType getUserType(String role) {
+		return userTypeDAO.getUserType(role);
+		}
 	
 }

@@ -11,9 +11,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name="users")
@@ -35,9 +37,22 @@ public class Users{
 	
 	@Column(name="created_on")
 	private LocalDateTime createdOn;
+	@Transient
+	private String role;
 	
 	
-	@OneToOne(cascade = CascadeType.ALL,  orphanRemoval = true)
+	public String getRole() {
+		return role;
+	}
+
+
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+
+	@ManyToOne
 	@JsonIgnore
 	@JoinColumn(name="user_type_id", referencedColumnName = "id")
 	private UserType userType;
@@ -151,6 +166,9 @@ public class Users{
 		this.userTypeId = userTypeId;
 	}	
 	*/
+
+
+
 }
 
 

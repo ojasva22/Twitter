@@ -7,10 +7,13 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bhtwitter.twitter.dao.UserTypeDAO;
 import com.bhtwitter.twitter.dao.UsersDAO;
 import com.bhtwitter.twitter.entity.Users;
 @Service
 public class UsersServiceImpl implements UsersService {
+	@Autowired
+	private UserTypeService userTypeService;
 	
 	private UsersDAO usersDAO;
 	@Autowired
@@ -20,12 +23,16 @@ public class UsersServiceImpl implements UsersService {
 	@Override
 	@Transactional
 	public void save(Users theUser) {
+		String r = theUser.getUsername();
+		System.out.println(r);
+		
+		theUser.setUserType(userTypeService.getUserType(theUser.getRole()));
 		usersDAO.save(theUser);
 
 	}
 	@Override
 	public Users getUserById(Integer id) {
-		// TODO Auto-generated method stub
+		
 		return usersDAO.getUserById(id);
 	}
 	@Override

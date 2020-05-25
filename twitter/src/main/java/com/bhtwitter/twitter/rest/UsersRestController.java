@@ -31,6 +31,7 @@ public class UsersRestController {
 	public void addUser( @RequestBody Users theUser)
 	{
 		//theUser.setPassword(passwordEncoder.encode(theUser.getPassword()));
+		
 		theUser.setCreatedOn(LocalDateTime.now());
 		usersService.save(theUser);
 		//return theUser;

@@ -3,6 +3,7 @@ package com.bhtwitter.twitter.dao;
 import javax.persistence.EntityManager;
 
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -12,10 +13,16 @@ public class UserTypeDAOImpl implements UserTypeDAO {
 
 	@Autowired
 	private EntityManager entityManager;
+	
+	
+
 	@Override
-	public void save(UserType theUserType) {
-		Session currentSession = entityManager.unwrap(Session.class);
-		currentSession.saveOrUpdate(theUserType);
+	public UserType getUserType(String role) {
+		Session currenSession = entityManager.unwrap(Session.class);
+		Query q = currenSession.createQuery("from UserType where type= :role");
+		q.setParameter("role", role.toUpperCase());
+		return (UserType) q.getSingleResult();
+		
 	
 	}
 
