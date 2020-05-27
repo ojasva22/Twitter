@@ -11,6 +11,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name="likes")
 public class Likes {
@@ -25,7 +28,9 @@ public class Likes {
 	@ManyToOne
 	@JoinColumn(name = "user_liked")
 	private Users userLiked;
+	
 	@ManyToOne
+	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) 
 	@JoinColumn(name="tweet_liked")
 	private Tweets tweetLiked;
 	

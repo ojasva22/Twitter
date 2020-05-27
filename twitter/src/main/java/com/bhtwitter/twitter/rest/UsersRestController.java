@@ -1,7 +1,12 @@
 package com.bhtwitter.twitter.rest;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.bhtwitter.twitter.entity.Users;
+import com.bhtwitter.twitter.exception.AlreadyExists;
+import com.bhtwitter.twitter.exception.UserNotFoundException;
 import com.bhtwitter.twitter.service.UsersService;
 
 
@@ -28,12 +35,14 @@ public class UsersRestController {
 	}*/
 	
 	@PostMapping("/register")
-	public void addUser( @RequestBody Users theUser)
+	public void addUser( @Valid @RequestBody Users theUser)
 	{
 		//theUser.setPassword(passwordEncoder.encode(theUser.getPassword()));
 		
 		theUser.setCreatedOn(LocalDateTime.now());
 		usersService.save(theUser);
+		
+		
 		//return theUser;
 		
 		
@@ -44,10 +53,10 @@ public class UsersRestController {
 	}
 	
 	@GetMapping("/users/{name}")
-	public Users getUserByUsername(@PathVariable String name) {
+	public Users getUserByUsername(@PathVariable String name) throws UserNotFoundException {
 		Users user = usersService.getUserByUsername(name);
-		System.out.println(user.getUsername());
-		System.out.println(user.getPassword());
+		if(user==null)
+			throw new UserNotFoundException("Username Not Found");
 		return user;
 	}
 

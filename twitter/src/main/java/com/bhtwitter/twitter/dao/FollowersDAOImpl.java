@@ -1,5 +1,8 @@
 package com.bhtwitter.twitter.dao;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.hibernate.Session;
@@ -13,6 +16,8 @@ import com.bhtwitter.twitter.entity.Users;
 public class FollowersDAOImpl implements FollowersDAO {
 	@Autowired
 	private EntityManager entityManager;
+	@Autowired
+	private UsersDAO userDAO;
 	
 	@Override
 	public void followerAdd(Followers theFollower) {
@@ -31,6 +36,18 @@ public class FollowersDAOImpl implements FollowersDAO {
 		q.setParameter("userToUnfollow", userToUnfollow);
 		q.executeUpdate();
 		
+	}
+
+	@Override
+	public List<Users> getFollowers(int userId) {
+		Users user = userDAO.getUserById(userId);
+		List<Users> listUsers=new ArrayList<>();
+		List<Followers> followers=  user.getFollowers();
+		
+		for(Followers fl : followers) {
+			listUsers.add(fl.getUserFollower());
+		}
+		return listUsers;
 	}
 
 }

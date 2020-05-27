@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bhtwitter.twitter.entity.Tweets;
+import com.bhtwitter.twitter.entity.Users;
+import com.bhtwitter.twitter.service.LikesService;
 import com.bhtwitter.twitter.service.TweetService;
 import com.bhtwitter.twitter.service.UsersService;
 
@@ -26,6 +29,8 @@ public class TweetsRestController {
 		tweetService = theTweetService;
 		//usersService = theUsersService;
 	}
+	@Autowired
+	private LikesService likesService;
 	
 	@PostMapping("/{userId}/tweets")
 	public void addTweets(@PathVariable int userId, @RequestBody Tweets theTweet)
@@ -43,8 +48,26 @@ public class TweetsRestController {
 			System.out.println(t);
 		}
 	}
-	@DeleteMapping("/tweets/{tweetId}")
-	public void deleteTweet(@PathVariable int tweetId) {
-		tweetService.delete(tweetId);
+	@DeleteMapping("/users/{userId}/tweets/{tweetId}")
+	public void deleteTweet(@PathVariable int tweetId, @PathVariable int userId) {
+		tweetService.delete(tweetId, userId);
+	}
+	
+	@GetMapping("/tweets/{tweetId}/likes")
+	@ResponseBody
+	public List<Users> getTweetLikedByUsers(@PathVariable int tweetId){
+		return tweetService.getTweetLikedByUsers(tweetId);
+	}
+	
+	@GetMapping("/admin/tweets")
+	
+	public List<Tweets> getAllTweets()
+	{
+		return tweetService.getAllTweets();
+	}
+	
+	@GetMapping("/admin/trending")
+	public List<String> getTrendingTags(){
+		return tweetService.getTrendingTags();
 	}
 }

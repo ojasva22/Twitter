@@ -1,6 +1,7 @@
 package com.bhtwitter.twitter.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.transaction.Transactional;
 
@@ -11,6 +12,8 @@ import com.bhtwitter.twitter.dao.LikesDAO;
 import com.bhtwitter.twitter.entity.Likes;
 import com.bhtwitter.twitter.entity.Tweets;
 import com.bhtwitter.twitter.entity.Users;
+import com.bhtwitter.twitter.exception.TweetNotFoundException;
+import com.bhtwitter.twitter.exception.UserNotFoundException;
 
 @Service
 public class LikesServiceImpl implements LikesService {
@@ -25,7 +28,14 @@ public class LikesServiceImpl implements LikesService {
 	@Transactional
 	public void likeTweet(int userId, int tweetId) {
 		Users user = usersService.getUserById(userId);
-		Tweets tweet = tweetService.getTweetById(tweetId);
+		Tweets tweet;
+		if(user==null)
+			throw new UserNotFoundException("User not Found");
+		try {
+			 tweet = tweetService.getTweetById(tweetId);		
+		}catch(Exception e) {
+			throw new TweetNotFoundException("Tweet not found");
+		}
 		Likes l = new Likes(LocalDateTime.now(), user, tweet);
 		likesDAO.likeTweet(l);
 
@@ -35,10 +45,18 @@ public class LikesServiceImpl implements LikesService {
 	@Transactional
 	public void unlikeTweet(int userId, int tweetId) {
 		Users userLiked = usersService.getUserById(userId);
-		Tweets tweetLiked = tweetService.getTweetById(tweetId);
 		
+		if(userLiked==null)
+			throw new UserNotFoundException("User not Found");
+		Tweets tweetLiked;
+		try {
+			tweetLiked = tweetService.getTweetById(tweetId);
+		}catch(Exception e) {
+			throw new TweetNotFoundException("Tweet not found");
+		}
 		likesDAO.unlikeTweet(userLiked, tweetLiked);
 		
 	}
+
 
 }

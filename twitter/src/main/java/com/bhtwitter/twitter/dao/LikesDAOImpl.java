@@ -1,5 +1,8 @@
 package com.bhtwitter.twitter.dao;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
@@ -32,5 +35,6 @@ public class LikesDAOImpl implements LikesDAO {
 		q.executeUpdate();
 		
 	}
+	
 
 }

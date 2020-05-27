@@ -15,8 +15,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
+
+
 @Entity
 @Table(name="users")
 public class Users{
@@ -27,16 +34,25 @@ public class Users{
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="user_id")
 	private Integer id;
+	
+	@NotEmpty(message = "Username cannot be empty")
+	@Size(min = 2, max = 50, message = "Username length should be between 2 and 50")	
 	@Column(name="username")
 	private String username;
+	
+	@NotEmpty(message = "Password cannot be Empty")
+	@Size(min=6, message = "Password length should be >= 6")	
 	@Column(name="password")
 	private String password;
+	
+	@Email(message = "Invalid email")
 	@Column(name="email")
 	private String email;
 
 	
 	@Column(name="created_on")
 	private LocalDateTime createdOn;
+	@JsonProperty(access = Access.WRITE_ONLY)
 	@Transient
 	private String role;
 	
@@ -70,7 +86,35 @@ public class Users{
 	@JsonIgnore
 	private List<Followers> following;
 	
+	@OneToMany(mappedBy = "userLiked")
+	@JsonIgnore
+	private List<Likes> likedTweets;
 	
+	
+	public List<Followers> getFollowing() {
+		return following;
+	}
+
+
+
+	public void setFollowing(List<Followers> following) {
+		this.following = following;
+	}
+
+
+
+	public List<Likes> getLikedTweets() {
+		return likedTweets;
+	}
+
+
+
+	public void setLikedTweets(List<Likes> likedTweets) {
+		this.likedTweets = likedTweets;
+	}
+
+
+
 	public List<Followers> getFollowers() {
 		return followers;
 	}

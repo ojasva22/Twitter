@@ -2,26 +2,38 @@ package com.bhtwitter.twitter.service;
 
 
 
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import com.bhtwitter.twitter.dao.TweetsDAO;
-import com.bhtwitter.twitter.dao.UsersDAO;
 import com.bhtwitter.twitter.entity.Tweets;
-@Repository
+import com.bhtwitter.twitter.entity.Users;
+import com.bhtwitter.twitter.exception.TweetNotFoundException;
+import com.bhtwitter.twitter.exception.UserNotFoundException;
+@Service
 public class TweetServiceImpl implements TweetService {
-	private UsersDAO usersDAO;
+	@Autowired
+	private UsersService usersService;
 
 	private TweetsDAO tweetsDAO;
 	@Autowired
-	public TweetServiceImpl(TweetsDAO theTweetsDAO, UsersDAO theUsersDAO) {
+	public TweetServiceImpl(TweetsDAO theTweetsDAO) {
 		tweetsDAO = theTweetsDAO;
-		usersDAO = theUsersDAO;
+		
 	}
 	
 		
@@ -30,14 +42,18 @@ public class TweetServiceImpl implements TweetService {
 	@Transactional
 	public void save(Tweets theTweet, Integer userId) {
 		
-		theTweet.setTweetUserId(usersDAO.getUserById(userId));
+		Users user = usersService.getUserById(userId);
+		if(user==null)
+			throw new UserNotFoundException("User Not Found");
+		theTweet.setTweetUserId(user);
 		
 		String t = theTweet.getTweet();
 		System.out.println(t);
 		int l=t.length();
 		//length<=140
 		//extracting tags
-		ArrayList<String> listTags = new ArrayList<>();
+		
+		Set<String> listTags = new TreeSet<>();
 		for(int i=0; i<l; i++)
 		{
 			//System.out.println(t.charAt(i));
@@ -45,7 +61,7 @@ public class TweetServiceImpl implements TweetService {
 			{
 				i=i+1;
 				String tag="";
-				while((i<l) && (t.charAt(i)!='#' || t.charAt(i)!=' ')) {
+				while((i<l) && (t.charAt(i)!='#' && t.charAt(i)!=' ')) {
 					tag=tag+t.charAt(i);
 					i++;
 				}
@@ -56,8 +72,8 @@ public class TweetServiceImpl implements TweetService {
 			//System.out.println(tag);
 			}
 		}
-		String[] tagArray = listTags.toArray(new String[listTags.size()]);
-		theTweet.setTags(tagArray);
+		//String[] tagArray = listTags.toArray(new String[listTags.size()]);
+		theTweet.setTags(new ArrayList<>(listTags));
 		tweetsDAO.save(theTweet);
 
 	}
@@ -74,11 +90,24 @@ public class TweetServiceImpl implements TweetService {
 
 	@Override
 	@Transactional
-	public void delete(int tweetId) {
+	public void delete(int tweetId, int userId) throws TweetNotFoundException {
 		//Check if tweet was posted by user else error
-		tweetsDAO.delete(tweetId);
 		
+		Users user = usersService.getUserById(userId);
+			if(user==null)
+				throw new UserNotFoundException("User not found");
+			try {
+				Tweets t = tweetsDAO.getTweetById(tweetId);
+			}catch(Exception e) {
+			
+				throw new TweetNotFoundException("Tweet not found");
 	}
+			tweetsDAO.delete(tweetId);
+		
+			
+		}
+		
+
 
 
 
@@ -87,6 +116,74 @@ public class TweetServiceImpl implements TweetService {
 	public Tweets getTweetById(int id) {
 		return tweetsDAO.getTweetById(id);
 	}
+
+
+
+	@Override
+	public List<Users> getTweetLikedByUsers(int tweetId) {
+		Tweets theTweet = tweetsDAO.getTweetById(tweetId);
+		return tweetsDAO.getTweetLikedByUsers(theTweet);
+	}
+
+
+
+	@Override
+	public List<Tweets> getAllTweets() {
+		return tweetsDAO.getAllTweets();
+	}
+
+
+
+	@Override
+	public List<String> getTrendingTags() {
+		List<Tweets> tweets;
+		try {
+		tweets = tweetsDAO.getRecentTweets();
+		}catch(Exception e) {
+			throw new TweetNotFoundException("Tweets Not Found");
+		}
+		HashMap<String, Integer> hm = new HashMap<>();
+		for(Tweets t : tweets) {
+			
+			List<String> tags = t.getTags();
+			for(String tag : tags)
+			{
+				if(hm.containsKey(tag)) {
+					int ct = hm.get(tag);
+					ct=ct+1;
+					hm.put(tag,  ct);					
+				}
+				else {
+					hm.put(tag, 1);
+				}
+			}
+		}
+			
+			Map<String, Integer> sortedMap = sortByValue(hm);
+			ArrayList<String> res = new ArrayList<>();
+			ArrayList<String> keys = new ArrayList<>(sortedMap.keySet());
+			int l = keys.size();
+			int i=0;
+			while(i<l && i<10)
+			{
+				res.add(keys.get(i));
+				i++;
+			}
+			return res;
+			
+			
+			
+		}
+	
+	
+	public static Map<String, Integer> sortByValue(final Map<String, Integer> wordCounts) {
+        return wordCounts.entrySet()
+                .stream()
+                .sorted((Map.Entry.<String, Integer>comparingByValue().reversed()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+    }
+	
+	
 
 
 
