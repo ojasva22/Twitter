@@ -3,6 +3,7 @@ package com.bhtwitter.twitter.service;
 
 
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,21 +21,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bhtwitter.twitter.dao.TweetsDAO;
+import com.bhtwitter.twitter.entity.TagMaster;
 import com.bhtwitter.twitter.entity.Tweets;
 import com.bhtwitter.twitter.entity.Users;
+import com.bhtwitter.twitter.exception.NotSensitiveException;
 import com.bhtwitter.twitter.exception.TweetNotFoundException;
 import com.bhtwitter.twitter.exception.UserNotFoundException;
 @Service
 public class TweetServiceImpl implements TweetService {
 	@Autowired
 	private UsersService usersService;
-
+	
+	@Autowired
+	private SensitiveWordsService sensitiveWordsService;
 	private TweetsDAO tweetsDAO;
 	@Autowired
 	public TweetServiceImpl(TweetsDAO theTweetsDAO) {
 		tweetsDAO = theTweetsDAO;
 		
 	}
+	@Autowired
+	private TagMasterService tagMasterService;
 	
 		
 	
@@ -66,24 +73,42 @@ public class TweetServiceImpl implements TweetService {
 					i++;
 				}
 				if(tag.length()!=0)
-				listTags.add(tag);
+				listTags.add(tag.toLowerCase());
 				i=i-1;
 			
-			//System.out.println(tag);
+			
 			}
 		}
-		//String[] tagArray = listTags.toArray(new String[listTags.size()]);
-		theTweet.setTags(new ArrayList<>(listTags));
+		LocalDateTime nowTime = LocalDateTime.now();
+		for(String tag : listTags) {
+			/*TagMaster tmOld = null ;
+			try {
+				tmOld = tagMasterService.getTag(tag);
+			}finally{
+			*/
+			boolean tmOld = tagMasterService.getTagExists(tag);
+			
+			if(tmOld==false) {
+			TagMaster tm = new TagMaster(tag, nowTime);
+			tagMasterService.saveTag(tm);
+			}
+		
+		}
+		
+		
+		for(String tag : listTags) {
+			TagMaster tm = tagMasterService.getTag(tag);
+			theTweet.addTag(tm);
+		}
 		tweetsDAO.save(theTweet);
 
 	}
 
 
 
-	@Override
-	
-	public List<Tweets> getTagRelatedTweets(String tag) {
-		return tweetsDAO.getTagRelatedTweets(tag);
+	@Override	
+	public List<Tweets> getTagRelatedTweets(String tag, int page) {
+		return tweetsDAO.getTagRelatedTweets(tag , page);
 	}
 
 
@@ -128,26 +153,25 @@ public class TweetServiceImpl implements TweetService {
 
 
 	@Override
-	public List<Tweets> getAllTweets() {
-		return tweetsDAO.getAllTweets();
+	public List<Tweets> getAllTweets(int page, String sort) {
+		return tweetsDAO.getAllTweets(page, sort);
 	}
 
 
 
 	@Override
 	public List<String> getTrendingTags() {
-		List<Tweets> tweets;
+		List<String> tags;
 		try {
-		tweets = tweetsDAO.getRecentTweets();
+		tags = (List<String>) tweetsDAO.getRecentTweets();
 		}catch(Exception e) {
 			throw new TweetNotFoundException("Tweets Not Found");
 		}
 		HashMap<String, Integer> hm = new HashMap<>();
-		for(Tweets t : tweets) {
+		for(String tag : tags) {
 			
-			List<String> tags = t.getTags();
-			for(String tag : tags)
-			{
+			
+			
 				if(hm.containsKey(tag)) {
 					int ct = hm.get(tag);
 					ct=ct+1;
@@ -156,7 +180,7 @@ public class TweetServiceImpl implements TweetService {
 				else {
 					hm.put(tag, 1);
 				}
-			}
+			
 		}
 			
 			Map<String, Integer> sortedMap = sortByValue(hm);
@@ -182,6 +206,21 @@ public class TweetServiceImpl implements TweetService {
                 .sorted((Map.Entry.<String, Integer>comparingByValue().reversed()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
+
+
+	@Override
+	@Transactional
+	public void delete(int tweetId) {
+		boolean isSensitive = sensitiveWordsService.checkSensitive(tweetId);
+		if(isSensitive) {
+			tweetsDAO.delete(tweetId);
+		}
+		else {
+			throw new NotSensitiveException("Tweet does not contain any sensitive word");
+		}
+		
+		
+	}
 	
 	
 

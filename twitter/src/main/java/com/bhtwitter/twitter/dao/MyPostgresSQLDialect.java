@@ -1,12 +1,13 @@
 package com.bhtwitter.twitter.dao;
 
-import org.hibernate.dialect.PostgreSQL10Dialect;
-import org.hibernate.dialect.PostgreSQLDialect;
+
+import org.hibernate.dialect.PostgreSQL82Dialect;
+
 import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.type.StandardBasicTypes;
 
-@SuppressWarnings("deprecation")
-public class MyPostgresSQLDialect extends PostgreSQLDialect {
+
+public class MyPostgresSQLDialect extends PostgreSQL82Dialect {
 	 public MyPostgresSQLDialect() {
 		    super();
 

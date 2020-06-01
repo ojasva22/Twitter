@@ -28,10 +28,10 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler{
 	@ExceptionHandler
 	public ResponseEntity<ErrorResponse> userAlreadyExists(AlreadyExists exc){
 		ErrorResponse error = new ErrorResponse();
-		error.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-		error.setMessage("Username already exists. Enter different username ");
+		error.setStatus(HttpStatus.BAD_REQUEST.value());
+		error.setMessage(exc.getMessage());
 		error.setTimestamp(LocalDateTime.now());
-		return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
 		
 		
 	}
@@ -39,7 +39,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler{
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 		ErrorResponse error = new ErrorResponse();
-		error.setMessage(ex.getMessage());
+		
+		error.setMessage(ex.getBindingResult().getFieldError().getDefaultMessage());
 		error.setStatus(HttpStatus.BAD_REQUEST.value());
 		error.setTimestamp(LocalDateTime.now());
 		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
@@ -49,24 +50,24 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler{
 		ErrorResponse error = new ErrorResponse();
 		error.setMessage(exc.getMessage());
 		error.setTimestamp(LocalDateTime.now());
-		error.setStatus(HttpStatus.NOT_FOUND.value());
-		return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+		error.setStatus(HttpStatus.BAD_REQUEST.value());
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
 	}
 	
 	@ExceptionHandler(TweetNotFoundException.class)
 	public ResponseEntity<ErrorResponse> handleException(TweetNotFoundException exc){
 		ErrorResponse error = new ErrorResponse();
-		error.setStatus(HttpStatus.NOT_FOUND.value());
+		error.setStatus(HttpStatus.BAD_REQUEST.value());
 		error.setMessage("Tweet not found ");
 		error.setTimestamp(LocalDateTime.now());
-		return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
 
 }
 	@ExceptionHandler(DataIntegrityViolationException.class)
 	public ResponseEntity<Object> handleException(DataIntegrityViolationException exc){
 		ErrorResponse error = new ErrorResponse();
 		error.setStatus(HttpStatus.CONFLICT.value());
-		error.setMessage(exc.getMessage());
+		error.setMessage(exc.getLocalizedMessage());
 		error.setTimestamp(LocalDateTime.now());
 		return new ResponseEntity<>(error, HttpStatus.CONFLICT);
 		
@@ -75,10 +76,46 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler{
 	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<Object> handleException(ConstraintViolationException exc){
 		ErrorResponse error = new ErrorResponse();
-		error.setStatus(HttpStatus.CONFLICT.value());
-		error.setMessage(exc.getMessage());
+		error.setStatus(HttpStatus.BAD_REQUEST.value());
+		error.setMessage(exc.getConstraintViolations().iterator().next().getMessage());
 		error.setTimestamp(LocalDateTime.now());
-		return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
 	
 }
+	
+	@ExceptionHandler(FollowerException.class)
+	public ResponseEntity<Object> handleException(FollowerException exc){
+		ErrorResponse error = new ErrorResponse();
+		error.setStatus(HttpStatus.BAD_REQUEST.value());
+		error.setMessage(exc.getMessage());
+		error.setTimestamp(LocalDateTime.now());
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+}
+	@ExceptionHandler(UniqueException.class)
+	public ResponseEntity<Object> handleException(UniqueException exc){
+		ErrorResponse error = new ErrorResponse();
+		error.setStatus(HttpStatus.BAD_REQUEST.value());
+		error.setMessage(exc.getMessage());
+		error.setTimestamp(LocalDateTime.now());
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+}
+	@ExceptionHandler(LengthException.class)
+	public ResponseEntity<Object> handleException(LengthException exc){
+		ErrorResponse error = new ErrorResponse();
+		error.setStatus(HttpStatus.BAD_REQUEST.value());
+		error.setMessage(exc.getMessage());
+		error.setTimestamp(LocalDateTime.now());
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+}
+	@ExceptionHandler(NotSensitiveException.class)
+	public ResponseEntity<Object> handleException(NotSensitiveException exc){
+		ErrorResponse error = new ErrorResponse();
+		error.setStatus(HttpStatus.BAD_REQUEST.value());
+		error.setMessage(exc.getMessage());
+		error.setTimestamp(LocalDateTime.now());
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+}
+	
+	
+	
 }

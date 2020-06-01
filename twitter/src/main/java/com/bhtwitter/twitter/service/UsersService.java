@@ -11,4 +11,7 @@ public interface UsersService {
 	public Users getUserById(Integer id);
 	public Users getUserByUsername(String username);
 	public List<Users> getUsers();
+	public boolean emailAlreadyExists(String email);
+	public boolean userAlreadyExists(String name);
+	
 }

@@ -15,7 +15,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
@@ -25,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 
 @Entity
-@Table(name="users")
+@Table(name="users", uniqueConstraints = {@UniqueConstraint(columnNames = {"username", "email"})})
 public class Users{
 	
 	
@@ -35,9 +37,11 @@ public class Users{
 	@Column(name="user_id")
 	private Integer id;
 	
-	@NotEmpty(message = "Username cannot be empty")
-	@Size(min = 2, max = 50, message = "Username length should be between 2 and 50")	
-	@Column(name="username")
+	@NotBlank(message = "Username cannot be empty")
+	@Size(min = 3, max = 50, message = "Username length should be between 2 and 50")
+	
+	@Column(name="username", unique = true)
+
 	private String username;
 	
 	@NotEmpty(message = "Password cannot be Empty")

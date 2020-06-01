@@ -35,7 +35,7 @@ public class UsersDAOImpl implements UsersDAO {
 		Users x;		
 		Query q = currentSession.createQuery("from Users where username like :name");
 		q.setParameter("name", name);		
-		 x = (Users) q.getSingleResult();		
+		 x = (Users) q.uniqueResult();		
 		return x;
 		
 	}
@@ -46,6 +46,29 @@ public class UsersDAOImpl implements UsersDAO {
 		List<Users> userList = q.getResultList();
 		return userList;
 		
+	}
+	@Override
+	public boolean emailAlreadyExists(String email) {
+		Session currentSession = entityManager.unwrap(Session.class);
+		Query q = currentSession.createQuery("select count(username) from Users where email = :email");
+		q.setParameter("email", email);
+		long x = (Long)q.uniqueResult();
+		if(x>0)
+			return true;
+		else
+			return false;
+	}
+	
+	@Override
+	public boolean userAlreadyExists(String name) {
+		Session currentSession = entityManager.unwrap(Session.class);
+		Query q = currentSession.createQuery("select count(username) from Users where username = :name");
+		q.setParameter("name", name);
+		long x = (Long)q.uniqueResult();
+		if(x>0)
+			return true;
+		else
+			return false;
 	}
 
 }
